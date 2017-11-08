@@ -1,0 +1,40 @@
+clone:
+  git:
+    image: plugins/git
+    depth: 5
+
+pipeline:
+  phpunit:
+    image: php:7
+    commands:
+      - /bin/sh conflict_detector.sh
+      - /bin/sh phplinter.sh app lib test
+      - composer install -q --prefer-dist
+      - test/db/import testdatabase root passwd testdb test.sql
+      - php -d memory_limit=256M vendor/bin/phpunit --no-coverage --colors=never
+  
+  notify:
+    image: plugins/slack
+    webhook: [your_slack_webhook_url]
+    channel: deployment
+    username: DroneCI
+    when:
+      status: success
+  
+  notify-bug:
+    image: plugins/slack
+    webhook: [your_slack_webhook_url]
+    channel: bugs
+    username: DroneCI
+    when:
+      status: failure
+      branch: production
+
+services:
+  testdatabase:
+    image: mysql:5.7
+    detach: true
+    environment:
+      - MYSQL_DATABASE=testdb
+      - MYSQL_ROOT_PASSWORD=passwd
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
