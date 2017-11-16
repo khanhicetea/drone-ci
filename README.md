@@ -73,7 +73,6 @@ services:
     environment:
       - MYSQL_DATABASE=testdb
       - MYSQL_ROOT_PASSWORD=passwd
-      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
 ```
 
 **This file consists 3 sections :**
